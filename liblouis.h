@@ -150,6 +150,3 @@ typedef void (*logcallback)(int level, const char *message);
 }
 #endif				/* __cplusplus */
 #endif				/*LibLOUIS_H_ */
-Powered by Gitiles| Privacy
-txt
-json
