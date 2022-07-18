@@ -1,4 +1,7 @@
-#include "liblouis.h"
+#include <liblouis.h>
+#include <signal.h>
+#include <cups/cups.h>
+
 
 /*
  * 'cfFiltertextobrf()' - Filter function to convert txt input into
@@ -15,11 +18,7 @@ cfFiltertextTobrf(int inputfd,         /* I - File descriptor input stream */
   
   FILE          *inputfp;		/* Input file pointer */
   int		fd = 0;			/* Copy file descriptor */
-  int           i, j;
-  int		pdftopdfapplied = 0;    /* Input data from pdftopdf filter? */
-  char		deviceCopies[32] = "1"; /* Hardware copies */
-  int		deviceCollate = 0;      /* Hardware collate */
-  char          make_model[128] = "";   /* Printer make and model (for quirks)*/
+  
   char		*filename,		/* PDF file to convert */
 		tempfile[1024];		/* Temporary file */
   char		buffer[8192];		/* Copy buffer */
@@ -31,15 +30,7 @@ cfFiltertextTobrf(int inputfd,         /* I - File descriptor input stream */
                 *option;
   const char    *exclude;
   cf_filter_data_t pstops_filter_data;
-  int           ret;
-  const char	*val;			/* Option value */
-  ppd_file_t	*ppd;			/* PPD file */
-  char		resolution[128] = "";   /* Output resolution */
-  int           xres = 0, yres = 0,     /* resolution values */
-                mres, res,
-                maxres = CUPS_PDFTOPS_MAX_RESOLUTION,
-                                        /* Maximum image rendering resolution */
-                numvalues;              /* Number of values actually read */
+  int           ret;  /* Number of values actually read */
   ppd_choice_t  *choice;
   ppd_attr_t    *attr;
   cups_page_header2_t header;
@@ -47,7 +38,15 @@ cfFiltertextTobrf(int inputfd,         /* I - File descriptor input stream */
   int		pdf_pid,		/* Process ID for pdftops/gs */
 		pdf_argc = 0,		/* Number of args for pdftops/gs */
 		pstops_pid = 0,		/* Process ID of pstops filter */
-		pstops_pipe[2],		/* Pipe to pstops filter */
+		pstops_pipe[2],		/* Pipe to pstop
+  const char	*val;			/* Option value */
+  ppd_file_t	*ppd;			/* PPD file */
+  char		resolution[128] = "";   /* Output resolution */
+  int           xres = 0, yres = 0,     /* resolution values */
+                mres, res,
+                maxres = CUPS_PDFTOPS_MAX_RESOLUTION,
+                                        /* Maximum image rendering resolution */
+                numvalues;            s filter */
 		need_post_proc = 0,     /* Post-processing needed? */
 		post_proc_pid = 0,	/* Process ID of post-processing */
 		post_proc_pipe[2],	/* Pipe to post-processing */
