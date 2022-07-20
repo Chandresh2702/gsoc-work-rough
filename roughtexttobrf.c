@@ -24,30 +24,18 @@ cfFiltertextTobrf(int inputfd,         /* I - File descriptor input stream */
   char		buffer[8192];		/* Copy buffer */
   int		bytes;			/* Bytes copied */
   int		num_options = 0,		/* Number of options */
-                num_pstops_options;	/* Number of options for pstops */
+           
   cups_option_t	*options = NULL,		/* Options */
-                *pstops_options,	/* Options for pstops filter function */
                 *option;
   const char    *exclude;
-  cf_filter_data_t pstops_filter_data;
   int           ret;  /* Number of values actually read */
   ppd_choice_t  *choice;
   ppd_attr_t    *attr;
   cups_page_header2_t header;
   cups_file_t	*fp;			/* Post-processing input file */
-  int		pdf_pid,		/* Process ID for pdftops/gs */
-		pdf_argc = 0,		/* Number of args for pdftops/gs */
-		pstops_pid = 0,		/* Process ID of pstops filter */
-		pstops_pipe[2],		/* Pipe to pstop
   const char	*val;			/* Option value */
   ppd_file_t	*ppd;			/* PPD file */
-  char		resolution[128] = "";   /* Output resolution */
-  int           xres = 0, yres = 0,     /* resolution values */
-                mres, res,
-                maxres = CUPS_PDFTOPS_MAX_RESOLUTION,
-                                        /* Maximum image rendering resolution */
-                numvalues;            s filter */
-		need_post_proc = 0,     /* Post-processing needed? */
+ 		need_post_proc = 0,     /* Post-processing needed? */
 		post_proc_pid = 0,	/* Process ID of post-processing */
 		post_proc_pipe[2],	/* Pipe to post-processing */
 		wait_children,		/* Number of child processes left */
@@ -55,8 +43,7 @@ cfFiltertextTobrf(int inputfd,         /* I - File descriptor input stream */
 		wait_status,		/* Status from child */
 		exit_status = 0;	/* Exit status */
   int gray_output = 0; /* Checking for monochrome/grayscale PostScript output */
-  char		*pdf_argv[100],		/* Arguments for pdftops/gs */
-		*ptr;			/* Pointer into value */
+ 		*ptr;			/* Pointer into value */
   int		duplex, tumble;         /* Duplex settings for PPD-less
 					   printing */
   cf_logfunc_t log = data->logfunc;
@@ -86,7 +73,7 @@ cfFiltertextTobrf(int inputfd,         /* I - File descriptor input stream */
     if (!iscanceled || !iscanceled(icd))
     {
       if (log) log(ld, CF_LOGLEVEL_DEBUG,
-		   "cfFilterPDFToPS: Unable to open input data stream.");
+		   "cflitertexttobrf : Unable to open input data stream.");
     }
 
     return (1);
@@ -99,12 +86,12 @@ cfFiltertextTobrf(int inputfd,         /* I - File descriptor input stream */
   if ((fd = cupsTempFd(tempfile, sizeof(tempfile))) < 0)
   {
     if (log) log(ld, CF_LOGLEVEL_ERROR,
-		 "cfFilterPDFToPS: Unable to copy PDF file: %s", strerror(errno));
+		 "cflitertexttobrf : Unable to copy PDF file: %s", strerror(errno));
     return (1);
   }
 
   if (log) log(ld, CF_LOGLEVEL_DEBUG,
-	       "cfFilterPDFToPS: Copying input to temp file \"%s\"",
+	       "cflitertexttobrf : Copying input to temp file \"%s\"",
 	       tempfile);
 
   while ((bytes = fread(buffer, 1, sizeof(buffer), inputfp)) > 0)
